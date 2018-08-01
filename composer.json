@@ -13,7 +13,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Hcode\\": "vendor\\hcodebr\\php-classes\\src"
+			"Hcode\\": "vendor\\hcodebr\\php-classes\\src",
+			"Icarohs7\\": "vendor\\icarohs7\\nxphpcommons\\src"
 		}
 	},
 	"description": ""

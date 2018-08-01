@@ -1,0 +1,21 @@
+{
+	"name": "icarohs7/nxphpcommons",
+	"minimum-stability": "dev",
+	"type": "library",
+	"description": "Biblioteca de componentes PHP",
+	"homepage": "https://github.com/icarohs7/unoxphpcommons",
+	"authors": [
+		{
+			"name": "Icaro D Temponi",
+			"email": "icarohs7@gmail.com"
+		}
+	],
+	"require": {
+		"php": ">=7.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"": "src"
+		}
+	}
+}

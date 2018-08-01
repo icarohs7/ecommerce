@@ -5,6 +5,7 @@ require_once("vendor/autoload.php");
 use Hcode\Model\User;
 use Hcode\Page;
 use Hcode\PageAdmin;
+use Icarohs7\NXUtils;
 use Slim\Slim;
 
 $app = new Slim();
@@ -33,15 +34,125 @@ $app->get('/admin/login', function () {
 
 $app->post('/admin/login', function () {
 	User::login($_POST['login'], $_POST['password']);
-	
-	header('Location: /admin');
-	exit;
+	NXUtils::redirect('/admin');
 });
 
 $app->get('/admin/logout', function () {
 	User::logout();
-	header('Location: /admin/login');
-	exit;
+	NXUtils::redirect('/admin/login');
+});
+
+$app->get('/admin/users', function () {
+	User::verifyLogin();
+	
+	$users = User::listAll();
+	
+	$page = new PageAdmin();
+	$page->setTpl('users', [
+		'users' => $users
+	]);
+});
+
+$app->get('/admin/users/create', function () {
+	User::verifyLogin();
+	$page = new PageAdmin();
+	$page->setTpl('users-create');
+});
+
+$app->get('/admin/users/:iduser/delete', function ($iduser) {
+	User::verifyLogin();
+	
+	$user = User::get($iduser);
+	$user->delete();
+	
+	NXUtils::redirect('/admin/users');
+});
+
+$app->get('/admin/users/:iduser', function ($iduser) {
+	User::verifyLogin();
+	
+	$user = User::get((int)$iduser);
+	
+	$page = new PageAdmin();
+	$page->setTpl('users-update', [
+		'user' => $user->getValues()
+	]);
+});
+
+$app->post('/admin/users/create', function () {
+	User::verifyLogin();
+	
+	$user = new User();
+	$_POST['inadmin'] = $_POST['inadmin'] ?? 0;
+	$user->setData($_POST);
+	$user->save();
+	
+	NXUtils::redirect('/admin/users');
+});
+
+$app->post('/admin/users/:iduser', function ($iduser) {
+	User::verifyLogin();
+	
+	$user = User::get($iduser);
+	$user->setData($_POST);
+	$user->update();
+	
+	NXUtils::redirect('/admin/user');
+});
+
+$app->get('/admin/forgot', function () {
+	$page = new PageAdmin([
+		'header' => false,
+		'footer' => false
+	]);
+	
+	$page->setTpl('forgot');
+});
+
+$app->post('/admin/forgot', function () {
+	$user = User::getForgot($_POST['email']);
+	NXUtils::redirect('/admin/forgot/sent');
+});
+
+$app->get('/admin/forgot/sent', function () {
+	$page = new PageAdmin([
+		'header' => false,
+		'footer' => false
+	]);
+	
+	$page->setTpl('forgot-sent');
+});
+
+$app->get('/admin/forgot/reset', function () {
+	$user = User::validForgotDecrypt($_GET['code']);
+	
+	$page = new PageAdmin([
+		'header' => false,
+		'footer' => false
+	]);
+	
+	$page->setTpl('forgot-reset', [
+		'name' => $user['desperson'],
+		'code' => $_GET['code']
+	]);
+});
+
+$app->post('/admin/forgot/reset', function () {
+	$forgot = User::validForgotDecrypt($_POST['code']);
+	
+	User::setForgotUsed($forgot['idrecovery']);
+	$user = User::get($forgot['iduser']);
+	$password = password_hash($_POST['password'], PASSWORD_DEFAULT, [
+		'cost' => 12
+	]);
+	$user->setPassword($password);
+	
+	$page = new PageAdmin([
+		'header' => false,
+		'footer' => false
+	]);
+	
+	$page->setTpl('forgot-reset-success');
 });
 
 $app->run();
