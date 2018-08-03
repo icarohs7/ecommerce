@@ -13,14 +13,6 @@ use Hcode\DB\Sql;
 
 class Category extends Model {
 	
-	public static function listAll() {
-		$sql = new Sql();
-		
-		$q = 'SELECT * FROM tb_categories ORDER BY descategory';
-		
-		return $sql->select($q);
-	}
-	
 	public static function get(int $idcategory): Category {
 		$sql = new Sql();
 		$q = 'SELECT * FROM tb_categories WHERE idcategory = :idcategory';
@@ -34,6 +26,38 @@ class Category extends Model {
 		return $category;
 	}
 	
+	public static function listAll() {
+		$sql = new Sql();
+		
+		$q = 'SELECT * FROM tb_categories ORDER BY descategory';
+		
+		return $sql->select($q);
+	}
+	
+	public static function updateFile() {
+		$categories = self::listAll();
+		
+		$html = [];
+		foreach ($categories as $category) {
+			$html[] =
+				'<li><a href="/categories/'
+				. $category['idcategory']
+				. '">'
+				. $category['descategory']
+				. '</a>'
+				. '</li>'
+				. "\n";
+		}
+		
+		file_put_contents(
+			$_SERVER['DOCUMENT_ROOT']
+			. DIRECTORY_SEPARATOR
+			. 'views'
+			. DIRECTORY_SEPARATOR
+			. 'categories-menu.html'
+			, implode('', $html));
+	}
+	
 	public function save() {
 		$sql = new Sql();
 		
@@ -45,6 +69,7 @@ class Category extends Model {
 		]);
 		
 		$this->setData($results[0]);
+		self::updateFile();
 	}
 	
 	public function delete() {
@@ -52,5 +77,6 @@ class Category extends Model {
 		$sql->query('DELETE FROM tb_categories WHERE idcategory = :idcategory', [
 			':idcategory' => $this->getidcategory()
 		]);
+		self::updateFile();
 	}
 }

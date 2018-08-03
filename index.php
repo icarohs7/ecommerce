@@ -205,4 +205,14 @@ $app->post('/admin/categories/:idcategory', function ($idcategory) {
 	NXUtils::redirect('/admin/categories');
 });
 
+$app->get('/categories/:idcategory', function ($idcategory) {
+	$category = Category::get($idcategory);
+	
+	$page = new Page();
+	$page->setTpl('category', [
+		'category' => $category->getValues(),
+		'products' => []
+	]);
+});
+
 $app->run();
