@@ -11,7 +11,8 @@ namespace Icarohs7;
 abstract class NXUtils {
 	public static function redirect(string $location, bool $endScriptAfterRedirection = true): void {
 		header("Location: $location");
-		if ($endScriptAfterRedirection)
+		if ($endScriptAfterRedirection) {
 			exit;
+		}
 	}
 }
